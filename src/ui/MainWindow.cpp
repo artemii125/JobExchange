@@ -67,14 +67,15 @@ void MainWindow::setupModels() {
 
     // 4. Заявки (JOIN)
     modelApplications = new QSqlQueryModel(this);
-    modelApplications->setQuery("SELECT a.id, app.full_name, v.specialty, a.application_date "
+    modelApplications->setQuery("SELECT a.id, a.applicant_id, app.full_name, v.specialty, a.application_date "
                                 "FROM applications a "
                                 "JOIN applicants app ON a.applicant_id = app.id "
                                 "JOIN vacancies v ON a.vacancy_id = v.id", db);
     modelApplications->setHeaderData(0, Qt::Horizontal, "ID");
-    modelApplications->setHeaderData(1, Qt::Horizontal, "Соискатель");
-    modelApplications->setHeaderData(2, Qt::Horizontal, "Вакансия");
-    modelApplications->setHeaderData(3, Qt::Horizontal, "Дата");
+    modelApplications->setHeaderData(1, Qt::Horizontal, "ID Соискателя");
+    modelApplications->setHeaderData(2, Qt::Horizontal, "Соискатель");
+    modelApplications->setHeaderData(3, Qt::Horizontal, "Вакансия");
+    modelApplications->setHeaderData(4, Qt::Horizontal, "Дата");
 
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);

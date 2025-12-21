@@ -6,7 +6,7 @@
 bool ApplicationDao::addApplication(int applicantId, int vacancyId, QString& error) {
     QSqlQuery q(DatabaseManager::instance().db());
     
-    q.prepare("SELECT COUNT(*) FROM applications WHERE applicant_id = :a_id AND vacancy_id = :v_id AND status = 'Активна'");
+    q.prepare("SELECT COUNT(*) FROM applications WHERE applicant_id = :a_id AND vacancy_id = :v_id AND status = 'Ожидание'");
     q.bindValue(":a_id", applicantId);
     q.bindValue(":v_id", vacancyId);
     q.exec();
@@ -16,7 +16,7 @@ bool ApplicationDao::addApplication(int applicantId, int vacancyId, QString& err
     }
     
     q.prepare("INSERT INTO applications (applicant_id, vacancy_id, status) "
-              "VALUES (:aid, :vid, 'Новая')");
+              "VALUES (:aid, :vid, 'Ожидание')");
     
     q.bindValue(":aid", applicantId);
     q.bindValue(":vid", vacancyId);
