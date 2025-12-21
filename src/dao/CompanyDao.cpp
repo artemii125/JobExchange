@@ -21,13 +21,28 @@ bool CompanyDao::addCompany(const CompanyData& data, QString& error) {
     return true;
 }
 
+bool CompanyDao::exists(const CompanyData& data) {
+    QSqlQuery query(DatabaseManager::instance().db());
+    query.prepare("SELECT COUNT(*) FROM companies WHERE name = :name OR inn = :inn OR address = :address OR phone = :phone");
+    query.bindValue(":name", data.name);
+    query.bindValue(":inn", data.inn);
+    query.bindValue(":address", data.address);
+    query.bindValue(":phone", data.phone);
+    query.exec();
+
+    if (query.next()) {
+        return query.value(0).toInt() > 0;
+    }
+    return false;
+}
+
 bool CompanyDao::removeCompany(int id, QString& error) {
     QSqlQuery q(DatabaseManager::instance().db());
     q.prepare("DELETE FROM companies WHERE id = :id");
     q.bindValue(":id", id);
 
     if (!q.exec()) {
-        error = q.lastError().text();
+        error ="Не удалось удалить: компания связана с активными вакансиями или заявками.";;
         return false;
     }
     return true;

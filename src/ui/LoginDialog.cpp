@@ -1,6 +1,7 @@
 #include "LoginDialog.h"
 #include "../dao/UserDao.h"
 #include <QVBoxLayout>
+#include <QFormLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
@@ -8,23 +9,26 @@
 
 LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle("Вход в систему");
-    setFixedSize(300, 200);
+    setFixedSize(400, 200);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    
+    layout->setContentsMargins(30, 20, 30, 20);
+    QFormLayout *formLayout = new QFormLayout();
+    formLayout->setSpacing(15);
+    formLayout->setLabelAlignment(Qt::AlignLeft);
+
     loginEdit = new QLineEdit(this);
-    loginEdit->setPlaceholderText("Логин");
+    formLayout->addRow(new QLabel("Логин:"), loginEdit);
     
     passEdit = new QLineEdit(this);
-    passEdit->setPlaceholderText("Пароль");
     passEdit->setEchoMode(QLineEdit::Password);
+    formLayout->addRow(new QLabel("Пароль:"), passEdit);
+
+    layout->addLayout(formLayout);
 
     QPushButton *btnLogin = new QPushButton("Войти", this);
     QPushButton *btnReg = new QPushButton("Регистрация", this);
 
-    layout->addWidget(new QLabel("Добро пожаловать"));
-    layout->addWidget(loginEdit);
-    layout->addWidget(passEdit);
     layout->addWidget(btnLogin);
     layout->addWidget(btnReg);
 

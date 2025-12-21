@@ -21,8 +21,9 @@ AddCompanyDialog::AddCompanyDialog(QWidget *parent) : QDialog(parent) {
     layout->addWidget(innEdit);
 
     layout->addWidget(new QLabel("Телефон*:"));
-    phoneEdit = new QLineEdit;
+    phoneEdit = new QLineEdit(this);
     phoneEdit->setInputMask("+7(999)999-99-99;_");
+    new PhoneInputFixer(phoneEdit);
     layout->addWidget(phoneEdit);
 
     layout->addWidget(new QLabel("Контактное лицо:"));
@@ -39,23 +40,45 @@ AddCompanyDialog::AddCompanyDialog(QWidget *parent) : QDialog(parent) {
 }
 
 void AddCompanyDialog::onSave() {
-    if(nameEdit->text().isEmpty() || phoneEdit->text().isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Заполните обязательные поля!");
+    CompanyDao::CompanyData data;
+    data.name = Utils::formatTitleCase(nameEdit->text().trimmed());
+    data.inn = innEdit->text().trimmed();
+    data.phone = phoneEdit->text();
+    data.contact = Utils::formatTitleCase(contactEdit->text().trimmed());
+    data.address = addressEdit->toPlainText().trimmed();
+    if(data.name.isEmpty() || data.phone.contains('_')) {
+        QMessageBox::warning(this, "Ошибка", "Заполните обязательные поля (Название и телефон)!");
         return;
     }
 
-    CompanyDao::CompanyData data;
-    data.name = Utils::formatTitleCase(nameEdit->text());
-    data.inn = innEdit->text();
-    data.phone = phoneEdit->text();
-    data.contact = Utils::formatTitleCase(contactEdit->text());
-    data.address = addressEdit->toPlainText();
-
     CompanyDao dao;
+    if (dao.exists(data)) {
+        QMessageBox::warning(this, "Ошибка", "Компания с такими данными (Название, ИНН, адрес, телефон или контактное лицо) уже существует!");
+        return;
+    }
+
     QString error;
     if(dao.addCompany(data, error)) {
         accept();
     } else {
         QMessageBox::critical(this, "Ошибка БД", error);
     }
+}
+
+void AddCompanyDialog::setCompanyData(const CompanyDao::CompanyData &data) {
+    nameEdit->setText(data.name);
+    innEdit->setText(data.inn);
+    addressEdit->setPlainText(data.address);
+    phoneEdit->setText(data.phone);
+    contactEdit->setText(data.contact);
+}
+
+CompanyDao::CompanyData AddCompanyDialog::getCompanyData() const {
+    CompanyDao::CompanyData data;
+    data.name = nameEdit->text();
+    data.inn = innEdit->text();
+    data.address = addressEdit->toPlainText();
+    data.phone = phoneEdit->text();
+    data.contact = contactEdit->text();
+    return data;
 }

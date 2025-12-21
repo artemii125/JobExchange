@@ -6,23 +6,21 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+# Поиск Qt6
 find_package(Qt6 COMPONENTS Widgets Sql REQUIRED)
 
+# Список всех исходных файлов
 set(PROJECT_SOURCES
     src/main.cpp
-    # Core
     src/core/DatabaseManager.cpp src/core/DatabaseManager.h
     src/core/Utils.h
-    # DAO (Слой работы с БД)
     src/dao/UserDao.cpp src/dao/UserDao.h
     src/dao/CompanyDao.cpp src/dao/CompanyDao.h
     src/dao/ApplicantDao.cpp src/dao/ApplicantDao.h
     src/dao/VacancyDao.cpp src/dao/VacancyDao.h
     src/dao/ApplicationDao.cpp src/dao/ApplicationDao.h
-    # UI (Интерфейс)
     src/ui/LoginDialog.cpp src/ui/LoginDialog.h
     src/ui/MainWindow.cpp src/ui/MainWindow.h
-    # Диалоги добавления
     src/ui/AddApplicantDialog.cpp src/ui/AddApplicantDialog.h
     src/ui/AddCompanyDialog.cpp src/ui/AddCompanyDialog.h
     src/ui/AddVacancyDialog.cpp src/ui/AddVacancyDialog.h
@@ -31,10 +29,25 @@ set(PROJECT_SOURCES
 add_executable(JobExchange ${PROJECT_SOURCES})
 target_link_libraries(JobExchange PRIVATE Qt6::Widgets Qt6::Sql)
 
-# --- Установка и Инсталлятор ---
+# --- Установка по стандартам Linux ---
 include(GNUInstallDirs)
-install(TARGETS JobExchange DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES db/init.sql DESTINATION share/JobExchange/db)
-install(FILES docker-compose.yml DESTINATION share/JobExchange)
 
-include(CPack)
+# Установка бинарного файла в /usr/local/bin
+install(TARGETS JobExchange RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Установка ресурсов в /usr/local/share/JobExchange
+install(FILES db/init.sql DESTINATION ${CMAKE_INSTALL_DATADIR}/JobExchange/db)
+install(FILES docker-compose.yml DESTINATION ${CMAKE_INSTALL_DATADIR}/JobExchange)
+
+# Создание ярлыка (.desktop файла) для меню приложений
+set(DESKTOP_FILE "${CMAKE_CURRENT_BINARY_DIR}/JobExchange.desktop")
+file(WRITE ${DESKTOP_FILE}
+    "[Desktop Entry]\n"
+    "Type=Application\n"
+    "Name=JobExchange\n"
+    "Exec=JobExchange\n"
+    "Icon=system-run\n"
+    "Categories=Office;Development;\n"
+    "Terminal=false\n"
+)
+install(FILES ${DESKTOP_FILE} DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)

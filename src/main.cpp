@@ -1,7 +1,9 @@
+#include <iostream>
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QStyleFactory>
 #include <QPalette>
+#include <QDebug>
 #include "core/DatabaseManager.h"
 #include "ui/LoginDialog.h"
 #include "ui/MainWindow.h"
@@ -29,36 +31,54 @@ void setDarkTheme(QApplication &app) {
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
     app.setApplicationName("JobExchange");
-    app.setApplicationVersion("1.0");
+    app.setApplicationVersion("1.0.0");
 
-    // 1. Применяем стиль
-    setDarkTheme(app);
-
-    // 2. Обработка флагов (--help, --uninstall)
+    // 1. Настройка парсера аргументов командной строки
     QCommandLineParser parser;
-    parser.setApplicationDescription("Биржа Труда");
+    parser.setApplicationDescription("JobExchange — Система управления биржей труда");
+    
+    // Добавляем стандартные опции -h/--help и -v/--version
     parser.addHelpOption();
     parser.addVersionOption();
-    
-    QCommandLineOption uninstallOpt("uninstall", "Удалить данные приложения");
+
+    // Добавляем опцию удаления
+    QCommandLineOption uninstallOpt(QStringList() << "u" << "uninstall", "Инструкция по полному удалению приложения.");
     parser.addOption(uninstallOpt);
+
+    // Парсим аргументы
     parser.process(app);
 
+    // 2. Обработка флагов
     if (parser.isSet(uninstallOpt)) {
-        qInfo() << "Запущена процедура очистки...";
-        // Логика удаления (имитация)
+        std::cout << "\n==============================================\n"
+                  << "ИНСТРУКЦИЯ ПО УДАЛЕНИЮ JobExchange:\n"
+                  << "==============================================\n"
+                  << "1. Удаление исполняемого файла:\n"
+                  << "   sudo rm /usr/local/bin/JobExchange\n\n"
+                  << "2. Удаление ярлыка меню:\n"
+                  << "   sudo rm /usr/local/share/applications/JobExchange.desktop\n\n"
+                  << "3. Удаление ресурсов (скрипты и конфиги):\n"
+                  << "   sudo rm -rf /usr/local/share/JobExchange\n\n"
+                  << "4. Остановка и удаление базы данных (Docker):\n"
+                  << "   Перейдите в папку с проектом и выполните:\n"
+                  << "   sudo docker-compose down\n"
+                  << "==============================================\n";
         return 0;
     }
 
-    // 3. Подключение к БД (с ожиданием)
+    // 3. Если флагов нет — запускаем графический интерфейс
+    setDarkTheme(app);
+
+    // 4. Подключение к БД
     if (!DatabaseManager::instance().connect()) {
+        qCritical() << "Не удалось подключиться к базе данных. Проверьте запущен ли Docker-контейнер.";
         return -1;
     }
 
-    // 4. Окно входа
+    // 5. Окно входа
     LoginDialog login;
     if (login.exec() == QDialog::Accepted) {
-        // 5. Главное окно (если вход успешен)
+        // 6. Главное окно (передаем роль пользователя)
         MainWindow w(login.getUserRole());
         w.show();
         return app.exec();

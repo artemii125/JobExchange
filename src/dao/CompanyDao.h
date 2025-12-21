@@ -6,6 +6,7 @@
 class CompanyDao {
 public:
     struct CompanyData {
+        int id;
         QString name;
         QString inn;
         QString phone;
@@ -15,6 +16,7 @@ public:
 
     bool addCompany(const CompanyData& data, QString& error);
     bool removeCompany(int id, QString& error);
+    bool exists(const CompanyData& data);
 };
 
 #endif // COMPANYDAO_H

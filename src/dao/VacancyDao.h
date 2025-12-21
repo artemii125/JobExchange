@@ -6,6 +6,7 @@
 class VacancyDao {
 public:
     struct VacancyData {
+        int id;
         int companyId;
         QString position;
         QString specialty;

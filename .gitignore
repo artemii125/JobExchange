@@ -52,3 +52,15 @@ compile_commands.json
 *creator.user*
 
 *_qmlcache.qrc
+
+# Специфично для твоего проекта
+build/
+JobExchange
+JobExchange_Setup.run
+JobExchange_Dist/
+*.deb
+*.tar.gz
+
+# База данных (если вдруг Docker создает локальные дампы или логи)
+*.log
+docker-data/

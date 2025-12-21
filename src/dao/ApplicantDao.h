@@ -7,6 +7,7 @@
 class ApplicantDao {
 public:
     struct ApplicantData {
+        int id;
         QString fullName;
         QDate birthDate;
         QString phone;
@@ -18,6 +19,7 @@ public:
 
     bool addApplicant(const ApplicantData& data, QString& error);
     bool removeApplicant(int id, QString& error);
+    bool exists(const ApplicantData& data);
 };
 
 #endif // APPLICANTDAO_H

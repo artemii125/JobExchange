@@ -8,6 +8,16 @@
 #include <QTableView>
 #include <QTabWidget>
 #include <QPushButton>
+#include <QStyledItemDelegate>
+
+class NumberDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    explicit NumberDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+    QString displayText(const QVariant &value, const QLocale &locale) const override {
+        return QString::number(value.toDouble(), 'f', 0);
+    }
+};
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -18,9 +28,9 @@ public:
 private slots:
     void refreshData();
     void onAddClicked();
-    void onEditClicked();
     void onDeleteClicked();
     void onRespondClicked(); // Кнопка "Откликнуться"
+    void onAcceptApplication();
     void onTabChanged(int index);
 
 private:
@@ -33,7 +43,6 @@ private:
     QTabWidget *tabWidget;
     QTableView *tableView;
     QPushButton *btnAdd;
-    QPushButton *btnEdit;
     QPushButton *btnDelete;
     QPushButton *btnRespond;
     QPushButton *btnRefresh;

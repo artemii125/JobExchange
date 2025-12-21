@@ -41,7 +41,7 @@ CREATE TABLE vacancies (
     position VARCHAR(100) NOT NULL, -- Должность
     specialty VARCHAR(100),
     salary DECIMAL(10, 2),
-    status VARCHAR(20) DEFAULT 'Активна', -- 'Активна', 'Закрыта'
+    status VARCHAR(20) DEFAULT 'Активна',
     posted_date DATE DEFAULT CURRENT_DATE,
     description TEXT,
     requirements TEXT
