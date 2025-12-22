@@ -46,24 +46,22 @@ AddApplicantDialog::AddApplicantDialog(QWidget *parent) : QDialog(parent) {
 
 void AddApplicantDialog::onSave() {
     
-    ApplicantDao::ApplicantData data;
+    ApplicantDao::ApplicantData data = getApplicantData();
 
-    QString fio = fioEdit->text().trimmed();
-    QDate birthDate = birthEdit->date();
 
-    if(fioEdit->text().isEmpty()) {
+    if(data.fullName.trimmed().isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Введите ФИО!");
         return;
     }
 
     QDate currentDate = QDate::currentDate();
-    int age = birthDate.daysTo(currentDate) / 365; 
+    int age = data.birthDate.daysTo(currentDate) / 365; 
     if (age < 16) {
         QMessageBox::warning(this, "Ошибка", "По ТК РФ работать можно только с 16 лет!");
         return;
     }
 
-    if (phoneEdit->text().contains('_')) {
+    if (data.phone.contains('_')) {
         QMessageBox::warning(this, "Ошибка", "Введите корректный номер телефона!");
         return;
     }

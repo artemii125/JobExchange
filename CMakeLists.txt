@@ -13,7 +13,7 @@ find_package(Qt6 COMPONENTS Widgets Sql REQUIRED)
 set(PROJECT_SOURCES
     src/main.cpp
     src/core/DatabaseManager.cpp src/core/DatabaseManager.h
-    src/core/Utils.h
+    src/core/Utils.cpp src/core/Utils.h
     src/dao/UserDao.cpp src/dao/UserDao.h
     src/dao/CompanyDao.cpp src/dao/CompanyDao.h
     src/dao/ApplicantDao.cpp src/dao/ApplicantDao.h
