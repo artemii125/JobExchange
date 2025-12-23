@@ -57,8 +57,7 @@ void MainWindow::setupModels() {
 
     // 3. Вакансии (JOIN)
     modelVacancies = new QSqlQueryModel(this);
-    modelVacancies->setQuery("SELECT v.id, c.name, v.specialty, v.salary, v.posted_date "
-                             "FROM vacancies v JOIN companies c ON v.company_id = c.id", db);
+    modelVacancies->setQuery(DatabaseManager::instance().getQuery("GetAllVacancies"), db);
     modelVacancies->setHeaderData(0, Qt::Horizontal, "ID");
     modelVacancies->setHeaderData(1, Qt::Horizontal, "Компания");
     modelVacancies->setHeaderData(2, Qt::Horizontal, "Специальность");
@@ -67,15 +66,13 @@ void MainWindow::setupModels() {
 
     // 4. Заявки (JOIN)
     modelApplications = new QSqlQueryModel(this);
-    modelApplications->setQuery("SELECT a.id, a.applicant_id, app.full_name, v.specialty, a.application_date "
-                                "FROM applications a "
-                                "JOIN applicants app ON a.applicant_id = app.id "
-                                "JOIN vacancies v ON a.vacancy_id = v.id", db);
+    modelApplications->setQuery(DatabaseManager::instance().getQuery("GetAllApplications"), db);
     modelApplications->setHeaderData(0, Qt::Horizontal, "ID");
     modelApplications->setHeaderData(1, Qt::Horizontal, "ID Соискателя");
     modelApplications->setHeaderData(2, Qt::Horizontal, "Соискатель");
     modelApplications->setHeaderData(3, Qt::Horizontal, "Вакансия");
-    modelApplications->setHeaderData(4, Qt::Horizontal, "Дата");
+    modelApplications->setHeaderData(4, Qt::Horizontal, "Статус");
+    modelApplications->setHeaderData(5, Qt::Horizontal, "Дата");
 
     proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -100,7 +97,9 @@ void MainWindow::setupUi() {
     btnDelete = new QPushButton("Удалить", this);
     btnRespond = new QPushButton("Откликнуться", this);
     btnRefresh = new QPushButton("Обновить", this);
+    btnUpdateStatus = new QPushButton("Изменить статус", this);
     
+    btnLayout->addWidget(btnUpdateStatus);
     btnLayout->addWidget(btnAdd);
     btnLayout->addWidget(btnDelete);
     btnLayout->addWidget(btnRespond);
@@ -125,13 +124,16 @@ void MainWindow::setupUi() {
     connect(btnAdd, &QPushButton::clicked, this, &MainWindow::onAddClicked);
     connect(btnDelete, &QPushButton::clicked, this, &MainWindow::onDeleteClicked);
     connect(btnRespond, &QPushButton::clicked, this, &MainWindow::onRespondClicked);
+    connect(btnUpdateStatus, &QPushButton::clicked, this, &MainWindow::onUpdateStatusClicked);
 }
 
 void MainWindow::updateButtonsState(int tabIndex) {
+    if (!btnUpdateStatus) return;
     bool isAdmin = (currentRole == "admin");
     btnAdd->setVisible(true);
     btnDelete->setVisible(true);
     btnRespond->setVisible(false);
+    btnUpdateStatus->setVisible(false);
     tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     if (tabIndex == 0) { // Соискатели
@@ -165,6 +167,9 @@ void MainWindow::updateButtonsState(int tabIndex) {
         btnDelete->setVisible(true);
         btnDelete->setEnabled(true);
         btnRespond->setVisible(false);
+        if (isAdmin) {
+            btnUpdateStatus->setVisible(true);
+        }
     }
 }
 
@@ -172,6 +177,8 @@ void MainWindow::onTabChanged(int index) {
     proxyModel->setSourceModel(nullptr);
     tableView->setItemDelegateForColumn(2, nullptr);
     tableView->setItemDelegateForColumn(3, nullptr);
+    if (!proxyModel || !tableView) return; // Защита от сегфолта
+    proxyModel->setSourceModel(nullptr);
     switch(index) {
         case 0: 
             proxyModel->setSourceModel(modelApplicants); 
@@ -191,6 +198,8 @@ void MainWindow::onTabChanged(int index) {
         case 3: 
             proxyModel->setSourceModel(modelApplications); 
             tableView->setColumnHidden(0, true);
+            tableView->setColumnHidden(1, false);
+            tableView->setColumnHidden(5, false);
             break;
     }
     updateButtonsState(index);
@@ -227,7 +236,6 @@ void MainWindow::onDeleteClicked() {
     QString error;
     bool success = false;
 
-    // Используем DAO для удаления
     if (index == 0) {
         ApplicantDao dao;
         success = dao.removeApplicant(id, error);
@@ -275,5 +283,37 @@ void MainWindow::onAcceptApplication() {
     if (this->currentRole != "admin") {
         QMessageBox::warning(this, "Доступ запрещен", "Только администратор может обрабатывать заявки!");
         return;
+    }
+}
+
+void MainWindow::onUpdateStatusClicked() {
+    if (this->currentRole != "admin") {
+        QMessageBox::warning(this, "Доступ запрещен", "Только администратор может изменять статус!");
+        return;
+    }
+
+    QItemSelectionModel *select = tableView->selectionModel();
+    if (!select->hasSelection() || tabWidget->currentIndex() != 3) {
+        QMessageBox::information(this, "Внимание", "Выберите заявку в таблице 'Заявки'");
+        return;
+    }
+
+    int row = select->selectedRows().first().row();
+
+    int appId = proxyModel->data(proxyModel->index(row, 0)).toInt();
+
+    QStringList statuses = {"Ожидание", "Одобрено", "Неодобрено"};
+    bool ok;
+    QString res = QInputDialog::getItem(this, "Статус", "Изменить статус заявки №" + QString::number(appId), 
+                                        statuses, 0, false, &ok);
+    
+    if (ok && !res.isEmpty()) {
+        ApplicationDao dao;
+        if (dao.updateStatus(appId, res)) {
+            refreshData();
+            QMessageBox::information(this, "Успех", "Статус обновлен");
+        } else {
+            QMessageBox::critical(this, "Ошибка", "Не удалось обновить статус");
+        }
     }
 }

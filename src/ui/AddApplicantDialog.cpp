@@ -21,17 +21,17 @@ AddApplicantDialog::AddApplicantDialog(QWidget *parent) : QDialog(parent) {
     birthEdit->setDate(QDate::currentDate().addYears(-18));
     layout->addWidget(birthEdit);
 
-    layout->addWidget(new QLabel("Телефон:"));
+    layout->addWidget(new QLabel("Телефон*:"));
     //phoneEdit = new QLineEdit;
     phoneEdit = new QLineEdit(this); 
     phoneEdit->setInputMask("+7(999)999-99-99;_");
     new PhoneInputFixer(phoneEdit);
     layout->addWidget(phoneEdit);
 
-    layout->addWidget(new QLabel("Email:"));
+    layout->addWidget(new QLabel("Email*:"));
     emailEdit = new QLineEdit; layout->addWidget(emailEdit);
 
-    layout->addWidget(new QLabel("Специальность:"));
+    layout->addWidget(new QLabel("Специальность*:"));
     specialtyEdit = new QLineEdit; layout->addWidget(specialtyEdit);
 
     layout->addWidget(new QLabel("Опыт работы (лет):"));
@@ -61,8 +61,18 @@ void AddApplicantDialog::onSave() {
         return;
     }
 
-    if (data.phone.contains('_')) {
+    if (data.phone.isEmpty() || data.phone.contains('_') || data.phone.length() < 16) {
         QMessageBox::warning(this, "Ошибка", "Введите корректный номер телефона!");
+        return;
+    }
+
+    if (data.email.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Поле 'Email' является обязательным!");
+        return;
+    }
+
+    if (data.specialty.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Поле 'Специальность' является обязательным!");
         return;
     }
 

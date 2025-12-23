@@ -4,9 +4,9 @@
 #include <QSqlError>
 
 bool ApplicationDao::addApplication(int applicantId, int vacancyId, QString& error) {
+    QString sql = DatabaseManager::instance().getQuery("CheckApplicationExists");
     QSqlQuery q(DatabaseManager::instance().db());
-    
-    q.prepare("SELECT COUNT(*) FROM applications WHERE applicant_id = :a_id AND vacancy_id = :v_id AND status = 'Ожидание'");
+    q.prepare(sql);
     q.bindValue(":a_id", applicantId);
     q.bindValue(":v_id", vacancyId);
     q.exec();
@@ -15,9 +15,8 @@ bool ApplicationDao::addApplication(int applicantId, int vacancyId, QString& err
         return false;
     }
     
-    q.prepare("INSERT INTO applications (applicant_id, vacancy_id, status) "
-              "VALUES (:aid, :vid, 'Ожидание')");
-    
+    QString addsql = DatabaseManager::instance().getQuery("AddApplication");
+    q.prepare(addsql);
     q.bindValue(":aid", applicantId);
     q.bindValue(":vid", vacancyId);
 
@@ -29,16 +28,18 @@ bool ApplicationDao::addApplication(int applicantId, int vacancyId, QString& err
 }
 
 bool ApplicationDao::updateStatus(int applicationId, const QString& status) {
+    QString sql = DatabaseManager::instance().getQuery("UpdateApplicationStatus");
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("UPDATE applications SET status = :status WHERE id = :id");
+    q.prepare(sql);
     q.bindValue(":status", status);
     q.bindValue(":id", applicationId);
     return q.exec();
 }
 
 bool ApplicationDao::removeApplication(int id, QString& error) {
+    QString sql = DatabaseManager::instance().getQuery("RemoveApplication");
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("DELETE FROM applications WHERE id = :id");
+    q.prepare(sql);
     q.bindValue(":id", id);
     
     if (!q.exec()) {
@@ -47,3 +48,4 @@ bool ApplicationDao::removeApplication(int id, QString& error) {
     }
     return true;
 }
+

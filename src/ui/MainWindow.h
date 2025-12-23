@@ -29,8 +29,9 @@ private slots:
     void refreshData();
     void onAddClicked();
     void onDeleteClicked();
-    void onRespondClicked(); // Кнопка "Откликнуться"
+    void onRespondClicked();
     void onAcceptApplication();
+    void onUpdateStatusClicked();
     void onTabChanged(int index);
 
 private:
@@ -40,14 +41,16 @@ private:
 
     QString currentRole;
 
+    //кнопки
     QTabWidget *tabWidget;
     QTableView *tableView;
     QPushButton *btnAdd;
     QPushButton *btnDelete;
     QPushButton *btnRespond;
     QPushButton *btnRefresh;
+    QPushButton *btnUpdateStatus;
     
-    // Модели
+    //модели
     QSqlTableModel *modelApplicants;
     QSqlTableModel *modelCompanies;
     QSqlQueryModel *modelVacancies;    

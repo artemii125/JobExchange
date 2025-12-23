@@ -38,8 +38,7 @@ CREATE TABLE applicants (
 CREATE TABLE vacancies (
     id SERIAL PRIMARY KEY,
     company_id INT REFERENCES companies(id) ON DELETE CASCADE,
-    position VARCHAR(100) NOT NULL, -- Должность
-    specialty VARCHAR(100),
+    specialty VARCHAR(100) NOT NULL,
     salary DECIMAL(10, 2),
     status VARCHAR(20) DEFAULT 'Активна',
     posted_date DATE DEFAULT CURRENT_DATE,
@@ -57,6 +56,11 @@ CREATE TABLE applications (
 );
 
 -- Данные
-INSERT INTO roles (name) VALUES ('admin'), ('user');
+INSERT INTO roles (id, name) VALUES (1, 'admin'), (2, 'user') 
+ON CONFLICT (id) DO NOTHING;
+
+-- Админ (пароль 'admin' в виде SHA-256 хеша)
 INSERT INTO users (login, password_hash, role_id) 
-VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 1);
+VALUES ('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 1) 
+ON CONFLICT (login) DO UPDATE 
+SET password_hash = EXCLUDED.password_hash;

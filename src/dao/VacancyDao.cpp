@@ -4,14 +4,23 @@
 #include <QSqlError>
 
 bool VacancyDao::addVacancy(const VacancyData& data, QString& error) {
+    if (exists(data)) {
+        error = "Такая вакансия в этой компании уже существует!";
+        return false;
+    }
+
+    QString sql = DatabaseManager::instance().getQuery("AddVacancy");
+    if (sql.isEmpty()) {
+        error = "Ошибка: Запрос 'AddVacancy' не найден в queries.sql";
+        return false;
+    }
+
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("INSERT INTO vacancies (company_id, position,  specialty, salary, status) "
-              "VALUES (:cid, :spec, :spec, :sal, :stat)");
+    q.prepare(sql);
     
-    q.bindValue(":cid", data.companyId);
-    q.bindValue(":pos", data.specialty);
+    q.bindValue(":company_id", data.companyId);
     q.bindValue(":spec", data.specialty);
-    q.bindValue(":sal", data.salary);
+    q.bindValue(":salary", data.salary);
     q.bindValue(":stat", data.status);
 
     if (!q.exec()) {
@@ -21,22 +30,30 @@ bool VacancyDao::addVacancy(const VacancyData& data, QString& error) {
     return true;
 }
 
-bool VacancyDao::removeVacancy(int id, QString& error) {
-    QSqlQuery q(DatabaseManager::instance().db());
+bool VacancyDao::exists(const VacancyData& data) {
+    QString sql = DatabaseManager::instance().getQuery("CheckVacancyExists");
+    QSqlQuery query(DatabaseManager::instance().db());
+    query.prepare(sql);
+    
+    query.bindValue(":company_id", data.companyId);
+    query.bindValue(":spec", data.specialty);
+    
+    if (query.exec() && query.next()) {
+        return query.value(0).toInt() > 0;
+    }
+    return false;
+}
 
-    q.prepare("SELECT COUNT(*) FROM applications WHERE vacancy_id = :id AND status = 'Активна'");
+bool VacancyDao::removeVacancy(int id, QString& error) {
+    QString sql = DatabaseManager::instance().getQuery("RemoveVacancy");
+    QSqlQuery q(DatabaseManager::instance().db());
+    q.prepare(sql);
     q.bindValue(":id", id);
     q.exec();
+
     if (q.next() && q.value(0).toInt() > 0) {
         error = "Нельзя снять вакансию, пока есть активные отклики! Сначала обработайте заявки.";
         return false;
     }
-
-    q.prepare("DELETE FROM applications WHERE vacancy_id = :id");
-    q.bindValue(":id", id);
-    q.exec();
-
-    q.prepare("DELETE FROM vacancies WHERE id = :id");
-    q.bindValue(":id", id);
-    return q.exec();
+    return true;
 }

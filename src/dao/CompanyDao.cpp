@@ -4,26 +4,34 @@
 #include <QSqlError>
 
 bool CompanyDao::addCompany(const CompanyData& data, QString& error) {
+    if (exists(data)) {
+        error = "Компания уже существует!";
+        return false;
+    }
+
+    QString sql = DatabaseManager::instance().getQuery("AddCompany");
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("INSERT INTO companies (name, inn, phone, contact_person, address) "
-              "VALUES (:name, :inn, :phone, :contact, :addr)");
     
+    if (!q.prepare(sql)) {
+        error = "Ошибка подготовки: " + q.lastError().text();
+        return false;
+    }
     q.bindValue(":name", data.name);
     q.bindValue(":inn", data.inn);
+    q.bindValue(":address", data.address); 
     q.bindValue(":phone", data.phone);
-    q.bindValue(":contact", data.contact);
-    q.bindValue(":addr", data.address);
+    q.bindValue(":contact_person", data.contact); // Было :contact
 
     if (!q.exec()) {
-        error = q.lastError().text();
+        error = q.lastError().text(); // Ошибка EXECUTE вылетает тут
         return false;
     }
     return true;
 }
-
 bool CompanyDao::exists(const CompanyData& data) {
+    QString sql = DatabaseManager::instance().getQuery("CheckCompanyExists");
     QSqlQuery query(DatabaseManager::instance().db());
-    query.prepare("SELECT COUNT(*) FROM companies WHERE name = :name OR inn = :inn OR address = :address OR phone = :phone");
+    query.prepare(sql);
     query.bindValue(":name", data.name);
     query.bindValue(":inn", data.inn);
     query.bindValue(":address", data.address);
@@ -37,8 +45,9 @@ bool CompanyDao::exists(const CompanyData& data) {
 }
 
 bool CompanyDao::removeCompany(int id, QString& error) {
+    QString sql = DatabaseManager::instance().getQuery("RemoveCompany");
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("DELETE FROM companies WHERE id = :id");
+    q.prepare(sql);
     q.bindValue(":id", id);
 
     if (!q.exec()) {

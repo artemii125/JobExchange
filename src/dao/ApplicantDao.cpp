@@ -8,9 +8,15 @@ bool ApplicantDao::addApplicant(const ApplicantData& data, QString& error) {
         error = "Соискатель с такими ФИО, телефоном или Email уже существует!";
         return false;
     }
+    // Получаем SQL из внешнего хранилища
+    QString sql = DatabaseManager::instance().getQuery("AddApplicant");
+    if (sql.isEmpty()) {
+        error = "Запрос 'AddApplicant' не найден в файле конфигурации!";
+        return false;
+    }
+
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("INSERT INTO applicants (full_name, birth_date, phone, email, specialty, experience_years) "
-              "VALUES (:name, :birth, :phone, :email, :spec, :exp)");
+    q.prepare(sql);
     
     q.bindValue(":name", data.fullName);
     q.bindValue(":birth", data.birthDate);
@@ -28,8 +34,10 @@ bool ApplicantDao::addApplicant(const ApplicantData& data, QString& error) {
 }
 
 bool ApplicantDao::exists(const ApplicantData& data) {
+    QString sql = DatabaseManager::instance().getQuery("CheckApplicantExists");
     QSqlQuery query(DatabaseManager::instance().db());
-    query.prepare("SELECT COUNT(*) FROM applicants WHERE full_name = :name OR phone = :phone OR email = :email");
+    
+    query.prepare(sql);
     query.bindValue(":name", data.fullName);
     query.bindValue(":phone", data.phone);
     query.bindValue(":email", data.email);
@@ -42,8 +50,9 @@ bool ApplicantDao::exists(const ApplicantData& data) {
 }
 
 bool ApplicantDao::removeApplicant(int id, QString& error) {
+    QString sql = DatabaseManager::instance().getQuery("RemoveApplicant");
     QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare("DELETE FROM applicants WHERE id = :id");
+    q.prepare(sql);
     q.bindValue(":id", id);
 
     if (!q.exec()) {
