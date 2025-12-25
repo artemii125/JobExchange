@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
     // Авторизация
     LoginDialog login;
     if (login.exec() == QDialog::Accepted) {
-        MainWindow w(login.getUserRole());
+        MainWindow w(login.getUserRole(), login.getUserId(), login.getUserType(), login.getProfileId());
         w.show();
         return app.exec();
     }

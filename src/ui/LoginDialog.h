@@ -10,6 +10,9 @@ class LoginDialog : public QDialog {
 public:
     explicit LoginDialog(QWidget *parent = nullptr);
     QString getUserRole() const { return userRole; }
+    int getUserId() const { return userId; }
+    QString getUserType() const { return userType; }
+    int getProfileId() const { return profileId; }
 
 private slots:
     void onLogin();
@@ -19,6 +22,9 @@ private:
     QLineEdit *loginEdit;
     QLineEdit *passEdit;
     QString userRole;
+    int userId = -1;
+    QString userType;
+    int profileId = -1;
 };
 
 #endif // LOGINDIALOG_H

@@ -2,6 +2,7 @@
 #include "../core/DatabaseManager.h"
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QDate>
 
 bool VacancyDao::addVacancy(const VacancyData& data, QString& error) {
     if (exists(data)) {
@@ -22,6 +23,7 @@ bool VacancyDao::addVacancy(const VacancyData& data, QString& error) {
     q.bindValue(":spec", data.specialty);
     q.bindValue(":salary", data.salary);
     q.bindValue(":stat", data.status);
+    q.bindValue(":posted_date", QDate::currentDate());
 
     if (!q.exec()) {
         error = q.lastError().text();
@@ -49,10 +51,9 @@ bool VacancyDao::removeVacancy(int id, QString& error) {
     QSqlQuery q(DatabaseManager::instance().db());
     q.prepare(sql);
     q.bindValue(":id", id);
-    q.exec();
-
-    if (q.next() && q.value(0).toInt() > 0) {
-        error = "Нельзя снять вакансию, пока есть активные отклики! Сначала обработайте заявки.";
+    
+    if (!q.exec()) {
+        error = q.lastError().text();
         return false;
     }
     return true;

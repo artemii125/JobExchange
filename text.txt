@@ -1,4 +1,0 @@
-docker exec jobexchange_db psql -U postgres -l
-docker exec jobexchange_db pg_dump -U postgres jobexchange > backup.sql
-
-docker exec -it jobexchange_db psql -U postgres -d jobexchange

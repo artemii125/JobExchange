@@ -9,12 +9,15 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     login VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    role_id INT REFERENCES roles(id)
+    role_id INT REFERENCES roles(id),
+    user_type VARCHAR(20), -- 'company' или 'applicant' для role_id=2
+    profile_id INT -- ID в companies или applicants
 );
 
 -- 1. КОМПАНИИ (Вкладка 3)
 CREATE TABLE companies (
     id SERIAL PRIMARY KEY,
+    user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(100) NOT NULL,
     inn VARCHAR(12) UNIQUE NOT NULL,
     address TEXT,
@@ -25,6 +28,7 @@ CREATE TABLE companies (
 -- 2. СОИСКАТЕЛИ (Вкладка 1)
 CREATE TABLE applicants (
     id SERIAL PRIMARY KEY,
+    user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
     full_name VARCHAR(150) NOT NULL, -- ФИО
     birth_date DATE,
     phone VARCHAR(20),
@@ -49,8 +53,8 @@ CREATE TABLE vacancies (
 -- 4. ЗАЯВКИ (Вкладка 4 - История)
 CREATE TABLE applications (
     id SERIAL PRIMARY KEY,
-    applicant_id INT REFERENCES applicants(id),
-    vacancy_id INT REFERENCES vacancies(id),
+    applicant_id INT REFERENCES applicants(id) ON DELETE CASCADE,
+    vacancy_id INT REFERENCES vacancies(id) ON DELETE CASCADE,
     application_date DATE DEFAULT CURRENT_DATE,
     status VARCHAR(50) DEFAULT 'На рассмотрении'
 );

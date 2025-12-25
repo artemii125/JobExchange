@@ -5,6 +5,7 @@
 #include <QPalette>
 #include <QDebug>
 #include "core/DatabaseManager.h"
+#include "core/QueryLoader.h"
 #include "ui/LoginDialog.h"
 #include "ui/MainWindow.h"
 
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
 
     // 3. Если флагов нет — запускаем графический интерфейс
     setDarkTheme(app);
+    app.setQuitOnLastWindowClosed(false);
 
     // 4. Подключение к БД
     if (!DatabaseManager::instance().connect()) {
@@ -75,12 +77,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // 5. Загрузка SQL-запросов
+    if (!QueryLoader::instance().loadQueries()) {
+        qWarning() << "Не удалось загрузить SQL-запросы из файлов";
+    }
+
     // 5. Окно входа
     LoginDialog login;
     if (login.exec() == QDialog::Accepted) {
-        // 6. Главное окно (передаем роль пользователя)
-        MainWindow w(login.getUserRole());
-        w.show();
+        // 6. Главное окно (передаем данные пользователя)
+        MainWindow *w = new MainWindow(login.getUserRole(), login.getUserId(), login.getUserType(), login.getProfileId());
+        w->show();
         return app.exec();
     }
 

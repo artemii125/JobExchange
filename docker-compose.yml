@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: secret_password
       POSTGRES_DB: jobexchange
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/postgresql/data

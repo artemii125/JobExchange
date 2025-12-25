@@ -45,14 +45,55 @@ bool CompanyDao::exists(const CompanyData& data) {
 }
 
 bool CompanyDao::removeCompany(int id, QString& error) {
-    QString sql = DatabaseManager::instance().getQuery("RemoveCompany");
-    QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare(sql);
-    q.bindValue(":id", id);
-
-    if (!q.exec()) {
-        error ="Не удалось удалить: компания связана с активными вакансиями или заявками.";;
+    // Получаем user_id компании
+    QSqlQuery getUserQuery(DatabaseManager::instance().db());
+    getUserQuery.prepare("SELECT user_id FROM companies WHERE id = :id");
+    getUserQuery.bindValue(":id", id);
+    
+    if (!getUserQuery.exec() || !getUserQuery.next()) {
+        error = "Компания не найдена";
         return false;
     }
+    
+    int userId = getUserQuery.value(0).toInt();
+    
+    // Проверяем наличие связанных вакансий
+    QSqlQuery checkQuery(DatabaseManager::instance().db());
+    checkQuery.prepare("SELECT COUNT(*) FROM vacancies WHERE company_id = :id");
+    checkQuery.bindValue(":id", id);
+    
+    if (!checkQuery.exec()) {
+        error = checkQuery.lastError().text();
+        return false;
+    }
+    
+    if (checkQuery.next() && checkQuery.value(0).toInt() > 0) {
+        error = "Нельзя удалить компанию: у неё есть активные вакансии";
+        return false;
+    }
+
+    // Удаляем пользователя (каскадно удалится и компания)
+    if (userId > 0) {
+        QSqlQuery deleteUserQuery(DatabaseManager::instance().db());
+        deleteUserQuery.prepare("DELETE FROM users WHERE id = :user_id");
+        deleteUserQuery.bindValue(":user_id", userId);
+        
+        if (!deleteUserQuery.exec()) {
+            error = deleteUserQuery.lastError().text();
+            return false;
+        }
+    } else {
+        // Если нет user_id, удаляем напрямую
+        QString sql = DatabaseManager::instance().getQuery("RemoveCompany");
+        QSqlQuery q(DatabaseManager::instance().db());
+        q.prepare(sql);
+        q.bindValue(":id", id);
+
+        if (!q.exec()) {
+            error = "Не удалось удалить: компания связана с активными вакансиями или заявками.";
+            return false;
+        }
+    }
+    
     return true;
 }

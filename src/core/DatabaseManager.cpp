@@ -21,7 +21,7 @@ DatabaseManager::~DatabaseManager() {
 
 bool DatabaseManager::connect() {
     m_db.setHostName("localhost");
-    m_db.setPort(5432);
+    m_db.setPort(5433);
     m_db.setDatabaseName("jobexchange");
     m_db.setUserName("postgres");
     m_db.setPassword("secret_password");
@@ -40,7 +40,7 @@ bool DatabaseManager::connect() {
     if (connected) {
         qInfo() << "Успешное подключение к БД.";
         // Мы вызываем loadQueries прямо здесь
-        if (!loadQueries("../db/queries.sql")) {
+        if (!loadQueries("db/queries.sql")) {
             qCritical() << "ОШИБКА: Подключились, но файл запросов queries.sql не найден!";
             return false; // Считаем подключение неудачным, так как работать без запросов нельзя
         }

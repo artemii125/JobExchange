@@ -64,3 +64,6 @@ JobExchange_Dist/
 # База данных (если вдруг Docker создает локальные дампы или логи)
 *.log
 docker-data/
+
+# Release files
+release-*/

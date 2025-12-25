@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/sql">
+        <file>db/init.sql</file>
+        <file>db/auth_queries.sql</file>
+        <file>db/data_queries.sql</file>
+    </qresource>
+</RCC>

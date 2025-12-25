@@ -23,16 +23,22 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(const QString &role, QWidget *parent = nullptr);
+    explicit MainWindow(const QString &role, int userId, const QString &userType, int profileId, QWidget *parent = nullptr);
+    ~MainWindow();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void refreshData();
     void onAddClicked();
     void onDeleteClicked();
     void onRespondClicked();
-    void onAcceptApplication();
     void onUpdateStatusClicked();
     void onTabChanged(int index);
+    void onExportData();
+    void onImportData();
+    void onLogout();
 
 private:
     void setupUi();
@@ -40,6 +46,10 @@ private:
     void updateButtonsState(int tabIndex);
 
     QString currentRole;
+    int currentUserId;
+    QString currentUserType;
+    int currentProfileId;
+    bool isLoggingOut = false;
 
     //кнопки
     QTabWidget *tabWidget;
@@ -49,6 +59,9 @@ private:
     QPushButton *btnRespond;
     QPushButton *btnRefresh;
     QPushButton *btnUpdateStatus;
+    QPushButton *btnExport;
+    QPushButton *btnImport;
+    QPushButton *btnLogout;
     
     //модели
     QSqlTableModel *modelApplicants;

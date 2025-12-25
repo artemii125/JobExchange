@@ -50,14 +50,55 @@ bool ApplicantDao::exists(const ApplicantData& data) {
 }
 
 bool ApplicantDao::removeApplicant(int id, QString& error) {
-    QString sql = DatabaseManager::instance().getQuery("RemoveApplicant");
-    QSqlQuery q(DatabaseManager::instance().db());
-    q.prepare(sql);
-    q.bindValue(":id", id);
-
-    if (!q.exec()) {
-        error = q.lastError().text();
+    // Получаем user_id соискателя
+    QSqlQuery getUserQuery(DatabaseManager::instance().db());
+    getUserQuery.prepare("SELECT user_id FROM applicants WHERE id = :id");
+    getUserQuery.bindValue(":id", id);
+    
+    if (!getUserQuery.exec() || !getUserQuery.next()) {
+        error = "Соискатель не найден";
         return false;
     }
+    
+    int userId = getUserQuery.value(0).toInt();
+    
+    // Проверяем наличие связанных заявок
+    QSqlQuery checkQuery(DatabaseManager::instance().db());
+    checkQuery.prepare("SELECT COUNT(*) FROM applications WHERE applicant_id = :id");
+    checkQuery.bindValue(":id", id);
+    
+    if (!checkQuery.exec()) {
+        error = checkQuery.lastError().text();
+        return false;
+    }
+    
+    if (checkQuery.next() && checkQuery.value(0).toInt() > 0) {
+        error = "Нельзя удалить соискателя: он привязан к заявкам";
+        return false;
+    }
+
+    // Удаляем пользователя (каскадно удалится и соискатель)
+    if (userId > 0) {
+        QSqlQuery deleteUserQuery(DatabaseManager::instance().db());
+        deleteUserQuery.prepare("DELETE FROM users WHERE id = :user_id");
+        deleteUserQuery.bindValue(":user_id", userId);
+        
+        if (!deleteUserQuery.exec()) {
+            error = deleteUserQuery.lastError().text();
+            return false;
+        }
+    } else {
+        // Если нет user_id, удаляем напрямую
+        QString sql = DatabaseManager::instance().getQuery("RemoveApplicant");
+        QSqlQuery q(DatabaseManager::instance().db());
+        q.prepare(sql);
+        q.bindValue(":id", id);
+
+        if (!q.exec()) {
+            error = q.lastError().text();
+            return false;
+        }
+    }
+    
     return true;
 }

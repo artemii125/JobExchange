@@ -1,11 +1,17 @@
 #include "LoginDialog.h"
+#include "RegisterDialog.h"
 #include "../dao/UserDao.h"
+#include "../core/DatabaseManager.h"
+#include "../core/QueryLoader.h"
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
 #include <QMessageBox>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QCryptographicHash>
 
 LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle("Вход в систему");
@@ -22,7 +28,21 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent) {
     
     passEdit = new QLineEdit(this);
     passEdit->setEchoMode(QLineEdit::Password);
-    formLayout->addRow(new QLabel("Пароль:"), passEdit);
+    
+    // Кнопка показа/скрытия пароля
+    auto *passwordLayout = new QHBoxLayout;
+    auto *showPasswordBtn = new QPushButton("👁");
+    showPasswordBtn->setMaximumWidth(30);
+    showPasswordBtn->setCheckable(true);
+    showPasswordBtn->setStyleSheet("QPushButton { color: gray; font-size: 16px; } QPushButton:checked { color: white; }");
+    passwordLayout->addWidget(passEdit);
+    passwordLayout->addWidget(showPasswordBtn);
+    
+    formLayout->addRow(new QLabel("Пароль:"), passwordLayout);
+    
+    connect(showPasswordBtn, &QPushButton::toggled, [this](bool checked) {
+        passEdit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
+    });
 
     layout->addLayout(formLayout);
 
@@ -32,28 +52,40 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent) {
     layout->addWidget(btnLogin);
     layout->addWidget(btnReg);
 
-    // Связываем кнопки с функциями
     connect(btnLogin, &QPushButton::clicked, this, &LoginDialog::onLogin);
     connect(btnReg, &QPushButton::clicked, this, &LoginDialog::onRegister);
 }
 
 void LoginDialog::onLogin() {
-    UserDao dao;
-    auto res = dao.login(loginEdit->text(), passEdit->text());
-    if (res.success) {
-        userRole = res.role;
-        accept(); // Закрыть диалог с успехом
+    QString login = loginEdit->text();
+    QString password = passEdit->text();
+    
+    if (login.isEmpty() || password.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Заполните все поля");
+        return;
+    }
+
+    QByteArray hash = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256);
+    QString passwordHash = hash.toHex();
+
+    QSqlQuery query(DatabaseManager::instance().db());
+    QString sql = QueryLoader::instance().getQuery("LoginUser");
+    query.prepare(sql);
+    query.addBindValue(login);
+    query.addBindValue(passwordHash);
+
+    if (query.exec() && query.next()) {
+        userId = query.value(0).toInt();
+        userRole = query.value(1).toString();
+        userType = query.value(2).toString();
+        profileId = query.value(3).toInt();
+        accept();
     } else {
-        QMessageBox::warning(this, "Ошибка", res.error);
+        QMessageBox::warning(this, "Ошибка", "Неверный логин или пароль");
     }
 }
 
 void LoginDialog::onRegister() {
-    UserDao dao;
-    auto res = dao.registerUser(loginEdit->text(), passEdit->text());
-    if (res.success) {
-        QMessageBox::information(this, "Успех", "Аккаунт создан! Теперь войдите.");
-    } else {
-        QMessageBox::critical(this, "Ошибка", res.error);
-    }
+    RegisterDialog dialog(this);
+    dialog.exec();
 }
