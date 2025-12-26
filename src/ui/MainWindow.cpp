@@ -1,10 +1,10 @@
 #include "MainWindow.h"
-// Диалоги
+//диалоги
 #include "AddApplicantDialog.h"
 #include "AddCompanyDialog.h"
 #include "AddVacancyDialog.h"
 #include "LoginDialog.h"
-// Ядро и DAO
+//ядро и DAO
 #include "../core/DatabaseManager.h"
 #include "../core/DataExporter.h"
 #include "../core/QueryLoader.h"
@@ -12,7 +12,7 @@
 #include "../dao/CompanyDao.h"
 #include "../dao/ApplicantDao.h"
 #include "../dao/ApplicationDao.h"
-// Qt
+//Qt
 #include <QApplication>
 #include <QTimer>
 #include <QCloseEvent>
@@ -54,7 +54,7 @@ MainWindow::~MainWindow() {
 void MainWindow::setupModels() {
     QSqlDatabase db = DatabaseManager::instance().db();
     
-    // Проверка готовности БД
+    //проверка готовности БД
     if (!db.isOpen() || !db.isValid()) {
         qWarning() << "База данных не готова";
         return;
@@ -143,7 +143,7 @@ void MainWindow::setupUi() {
     setCentralWidget(central);
     QVBoxLayout *mainLayout = new QVBoxLayout(central);
 
-    // Вкладки
+    //вкладки
     tabWidget = new QTabWidget(this);
     
     if (currentRole == "admin" || currentUserType == "applicant") {
@@ -157,7 +157,7 @@ void MainWindow::setupUi() {
     
     mainLayout->addWidget(tabWidget, 0);
 
-    // Кнопки
+    //кнопки
     QHBoxLayout *btnLayout = new QHBoxLayout();
     btnAdd = new QPushButton("Добавить", this);
     btnDelete = new QPushButton("Удалить", this);
@@ -185,7 +185,7 @@ void MainWindow::setupUi() {
     btnLayout->addWidget(btnLogout);
     mainLayout->addLayout(btnLayout);
 
-    // Таблица
+    //таблица
     tableView = new QTableView(this);
     tableView->setModel(proxyModel);
     tableView->setSortingEnabled(true);
@@ -299,10 +299,10 @@ void MainWindow::onAddClicked() {
     }
     else if (tabName == "Вакансии") {
         if (currentUserType == "company") {
-            // Создаем вакансию только для текущей компании
+            //создаем вакансию только для текущей компании
             dlg = new AddVacancyDialog(currentProfileId, this);
         } else {
-            // Администратор может выбрать любую компанию
+            //администратор может выбрать любую компанию
             dlg = new AddVacancyDialog(this);
         }
     }

@@ -34,14 +34,14 @@ private:
     QComboBox *typeCombo;
     QStackedWidget *profileStack;
     
-    // Поля компании
+    //поля компании
     QLineEdit *companyNameEdit;
     QLineEdit *innEdit;
     QLineEdit *addressEdit;
     QLineEdit *companyPhoneEdit;
     QLineEdit *contactPersonEdit;
     
-    // Поля соискателя
+    //поля соискателя
     QLineEdit *fullNameEdit;
     QDateEdit *birthDateEdit;
     QLineEdit *applicantPhoneEdit;

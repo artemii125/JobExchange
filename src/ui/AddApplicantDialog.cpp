@@ -37,7 +37,7 @@ AddApplicantDialog::AddApplicantDialog(QWidget *parent) : QDialog(parent) {
 
     layout->addWidget(new QLabel("Опыт работы (лет):"));
     
-    // Поле ввода опыта с ползунком
+    //поле ввода опыта с ползунком
     QHBoxLayout *expLayout = new QHBoxLayout;
     expEdit = new QSpinBox; 
     expEdit->setMinimum(0);
@@ -54,7 +54,7 @@ AddApplicantDialog::AddApplicantDialog(QWidget *parent) : QDialog(parent) {
 
     layout->addWidget(new QLabel("Желаемая зарплата (руб.):"));
     
-    // Поле ввода зарплаты с ползунком
+    //поле ввода зарплаты с ползунком
     QHBoxLayout *salaryLayout = new QHBoxLayout;
     salaryEdit = new QLineEdit;
     salaryEdit->setText("30000");
@@ -77,13 +77,13 @@ AddApplicantDialog::AddApplicantDialog(QWidget *parent) : QDialog(parent) {
     connect(salarySlider, &QSlider::valueChanged, this, &AddApplicantDialog::onSalarySliderChanged);
     connect(salaryEdit, &QLineEdit::textChanged, this, &AddApplicantDialog::onSalaryEditChanged);
     
-    // Синхронизация ползунка опыта
+    //синхронизация ползунка опыта
     connect(expSlider, &QSlider::valueChanged, expEdit, QOverload<int>::of(&QSpinBox::setValue));
     connect(expEdit, QOverload<int>::of(&QSpinBox::valueChanged), expSlider, &QSlider::setValue);
 }
 
 void AddApplicantDialog::onSalarySliderChanged(int value) {
-    // Округляем до ближайшей тысячи
+    //округляем до ближайшей тысячи
     int roundedValue = (value / 1000) * 1000;
     salaryEdit->setText(QString::number(roundedValue));
 }

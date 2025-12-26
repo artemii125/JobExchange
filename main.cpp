@@ -10,19 +10,19 @@ int main(int argc, char *argv[]) {
     app.setApplicationName("JobExchange");
     app.setApplicationVersion("1.0.0");
 
-    // Обработка флагов (удаление и т.д.)
+    //обработка флагов (удаление и т.д.)
     if (Utils::processCommandLine(app)) return 0;
 
-    // Применение оформления
+    //применение оформления
     Utils::applyDarkTheme();
 
-    // Подключение к БД
+    //подключение к БД
     if (!DatabaseManager::instance().connect()) {
         qCritical() << "Не удалось подключиться к базе данных.";
         return -1;
     }
 
-    // Авторизация
+    //авторизация
     LoginDialog login;
     if (login.exec() == QDialog::Accepted) {
         MainWindow w(login.getUserRole(), login.getUserId(), login.getUserType(), login.getProfileId());

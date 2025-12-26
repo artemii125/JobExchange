@@ -22,7 +22,7 @@ void AddVacancyDialog::setupUi(int companyId) {
     resize(400, 500);
     QVBoxLayout *layout = new QVBoxLayout(this);
 
-    // Показываем поле компании только если companyId не задан (для админов/сотрудников)
+    //показываем поле компании только если companyId не задан (для админов/сотрудников)
     if (companyId == -1) {
         layout->addWidget(new QLabel("Компания*:"));
         companyCombo = new QComboBox;
@@ -40,7 +40,7 @@ void AddVacancyDialog::setupUi(int companyId) {
         
         layout->addWidget(companyCombo);
     } else {
-        // Для пользователей-компаний создаем скрытый комбобокс с их компанией
+        //для пользователей-компаний создаем скрытый комбобокс с их компанией
         companyCombo = new QComboBox;
         companyCombo->addItem("", companyId);
         companyCombo->setVisible(false);

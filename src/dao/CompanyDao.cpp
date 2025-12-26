@@ -45,7 +45,7 @@ bool CompanyDao::exists(const CompanyData& data) {
 }
 
 bool CompanyDao::removeCompany(int id, QString& error) {
-    // Получаем user_id компании
+    //получаем user_id компании
     QSqlQuery getUserQuery(DatabaseManager::instance().db());
     getUserQuery.prepare("SELECT user_id FROM companies WHERE id = :id");
     getUserQuery.bindValue(":id", id);
@@ -57,7 +57,7 @@ bool CompanyDao::removeCompany(int id, QString& error) {
     
     int userId = getUserQuery.value(0).toInt();
     
-    // Проверяем наличие связанных вакансий
+    //проверяем наличие связанных вакансий
     QSqlQuery checkQuery(DatabaseManager::instance().db());
     checkQuery.prepare("SELECT COUNT(*) FROM vacancies WHERE company_id = :id");
     checkQuery.bindValue(":id", id);
@@ -72,7 +72,7 @@ bool CompanyDao::removeCompany(int id, QString& error) {
         return false;
     }
 
-    // Удаляем пользователя (каскадно удалится и компания)
+    //удаляем пользователя (каскадно удалится и компания)
     if (userId > 0) {
         QSqlQuery deleteUserQuery(DatabaseManager::instance().db());
         deleteUserQuery.prepare("DELETE FROM users WHERE id = :user_id");
@@ -83,7 +83,7 @@ bool CompanyDao::removeCompany(int id, QString& error) {
             return false;
         }
     } else {
-        // Если нет user_id, удаляем напрямую
+        //если нет user_id, удаляем напрямую
         QString sql = DatabaseManager::instance().getQuery("RemoveCompany");
         QSqlQuery q(DatabaseManager::instance().db());
         q.prepare(sql);

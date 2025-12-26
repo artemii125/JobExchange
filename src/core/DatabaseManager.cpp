@@ -39,7 +39,7 @@ bool DatabaseManager::connect() {
     }
     if (connected) {
         qInfo() << "Успешное подключение к БД.";
-        // Мы вызываем loadQueries прямо здесь
+        //мы вызываем loadQueries прямо здесь
         if (!loadQueries("db/queries.sql")) {
             qCritical() << "ОШИБКА: Подключились, но файл запросов queries.sql не найден!";
             return false; // Считаем подключение неудачным, так как работать без запросов нельзя
@@ -71,27 +71,27 @@ bool DatabaseManager::loadQueries(const QString &filePath) {
     while (!in.atEnd()) {
         QString line = in.readLine().trimmed();
         
-        // Если нашли заголовок ключа
+        //если нашли заголовок ключа
         if (line.startsWith("-- [") && line.contains("]")) {
-            // Сохраняем предыдущий накопленный запрос
+            //сохраняем предыдущий накопленный запрос
             if (!currentKey.isEmpty() && !currentSql.trimmed().isEmpty()) {
                 m_queries[currentKey] = currentSql.trimmed();
                 qDebug() << "Добавлен запрос в память:" << currentKey;
             }
             
-            // Вырезаем новый ключ
+            //вырезаем новый ключ
             int start = line.indexOf('[') + 1;
             int end = line.lastIndexOf(']');
             currentKey = line.mid(start, end - start).trimmed();
-            currentSql = ""; // Сбрасываем текст для нового ключа
+            currentSql = ""; //сбрасываем текст для нового ключа
         } 
-        // Если это не заголовок и не пустой комментарий — копим SQL
+        //если это не заголовок и не пустой комментарий — копим SQL
         else if (!line.startsWith("--") && !line.isEmpty()) {
             currentSql += line + " ";
         }
     }
     
-    // Не забываем сохранить самый последний запрос из файла
+    //не забываем сохранить самый последний запрос из файла
     if (!currentKey.isEmpty() && !currentSql.trimmed().isEmpty()) {
         m_queries[currentKey] = currentSql.trimmed();
         qDebug() << "Добавлен запрос в память (последний):" << currentKey;

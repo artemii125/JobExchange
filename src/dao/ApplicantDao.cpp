@@ -8,7 +8,7 @@ bool ApplicantDao::addApplicant(const ApplicantData& data, QString& error) {
         error = "Соискатель с такими ФИО, телефоном или Email уже существует!";
         return false;
     }
-    // Получаем SQL из внешнего хранилища
+    //получаем SQL из внешнего хранилища
     QString sql = DatabaseManager::instance().getQuery("AddApplicant");
     if (sql.isEmpty()) {
         error = "Запрос 'AddApplicant' не найден в файле конфигурации!";
@@ -50,7 +50,7 @@ bool ApplicantDao::exists(const ApplicantData& data) {
 }
 
 bool ApplicantDao::removeApplicant(int id, QString& error) {
-    // Получаем user_id соискателя
+    //получаем user_id соискателя
     QSqlQuery getUserQuery(DatabaseManager::instance().db());
     getUserQuery.prepare("SELECT user_id FROM applicants WHERE id = :id");
     getUserQuery.bindValue(":id", id);
@@ -62,7 +62,7 @@ bool ApplicantDao::removeApplicant(int id, QString& error) {
     
     int userId = getUserQuery.value(0).toInt();
     
-    // Проверяем наличие связанных заявок
+    //проверяем наличие связанных заявок
     QSqlQuery checkQuery(DatabaseManager::instance().db());
     checkQuery.prepare("SELECT COUNT(*) FROM applications WHERE applicant_id = :id");
     checkQuery.bindValue(":id", id);
@@ -77,7 +77,7 @@ bool ApplicantDao::removeApplicant(int id, QString& error) {
         return false;
     }
 
-    // Удаляем пользователя (каскадно удалится и соискатель)
+    //удаляем пользователя (каскадно удалится и соискатель)
     if (userId > 0) {
         QSqlQuery deleteUserQuery(DatabaseManager::instance().db());
         deleteUserQuery.prepare("DELETE FROM users WHERE id = :user_id");
@@ -88,7 +88,7 @@ bool ApplicantDao::removeApplicant(int id, QString& error) {
             return false;
         }
     } else {
-        // Если нет user_id, удаляем напрямую
+        //если нет user_id, удаляем напрямую
         QString sql = DatabaseManager::instance().getQuery("RemoveApplicant");
         QSqlQuery q(DatabaseManager::instance().db());
         q.prepare(sql);

@@ -9,7 +9,7 @@
 #include "ui/LoginDialog.h"
 #include "ui/MainWindow.h"
 
-// Функция включения темной темы (Fusion)
+//функция включения темной темы (Fusion)
 void setDarkTheme(QApplication &app) {
     app.setStyle(QStyleFactory::create("Fusion"));
     QPalette p;
@@ -38,15 +38,15 @@ int main(int argc, char *argv[]) {
     QCommandLineParser parser;
     parser.setApplicationDescription("JobExchange — Система управления биржей труда");
     
-    // Добавляем стандартные опции -h/--help и -v/--version
+    //добавляем стандартные опции -h/--help и -v/--version
     parser.addHelpOption();
     parser.addVersionOption();
 
-    // Добавляем опцию удаления
+    //добавляем опцию удаления
     QCommandLineOption uninstallOpt(QStringList() << "u" << "uninstall", "Инструкция по полному удалению приложения.");
     parser.addOption(uninstallOpt);
 
-    // Парсим аргументы
+    //парсим аргументы
     parser.process(app);
 
     // 2. Обработка флагов

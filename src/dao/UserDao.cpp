@@ -28,14 +28,14 @@ UserDao::AuthResult UserDao::login(const QString& login, const QString& password
 }
 
 UserDao::AuthResult UserDao::registerUser(const QString& login, const QString& password) {
-    // Проверка на дубликаты
+    //проверка на дубликаты
     QString checkSql = QueryLoader::instance().getQuery("CheckUserExists");
     QSqlQuery check(DatabaseManager::instance().db());
     check.prepare(checkSql);
     check.bindValue(":login", login);
     if(check.exec() && check.next()) return {false, "", "Пользователь уже существует"};
 
-    // Регистрация
+    //регистрация
     QString registerSql = QueryLoader::instance().getQuery("RegisterUser");
     QSqlQuery query(DatabaseManager::instance().db());
     query.prepare(registerSql);

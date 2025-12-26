@@ -29,7 +29,7 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent) {
     passEdit = new QLineEdit(this);
     passEdit->setEchoMode(QLineEdit::Password);
     
-    // Кнопка показа/скрытия пароля
+    //кнопка показа/скрытия пароля
     auto *passwordLayout = new QHBoxLayout;
     auto *showPasswordBtn = new QPushButton("👁");
     showPasswordBtn->setMaximumWidth(30);

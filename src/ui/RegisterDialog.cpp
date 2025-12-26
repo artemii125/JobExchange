@@ -30,7 +30,7 @@ void RegisterDialog::setupUi() {
     passwordEdit = new QLineEdit;
     passwordEdit->setEchoMode(QLineEdit::Password);
     
-    // Кнопка показа/скрытия пароля
+    //кнопка показа/скрытия пароля
     auto *passwordLayout = new QHBoxLayout;
     auto *showPasswordBtn = new QPushButton("👁");
     showPasswordBtn->setMaximumWidth(30);
@@ -53,7 +53,7 @@ void RegisterDialog::setupUi() {
 
     profileStack = new QStackedWidget;
 
-    // Форма компании
+    //форма компании
     auto *companyWidget = new QWidget;
     auto *companyLayout = new QFormLayout(companyWidget);
     companyNameEdit = new QLineEdit;
@@ -63,9 +63,9 @@ void RegisterDialog::setupUi() {
     addressEdit = new QLineEdit;
     companyPhoneEdit = new QLineEdit;
     companyPhoneEdit->setInputMask("+7(999)999-99-99;_");
-    companyPhoneEdit->setCursorPosition(3); // Устанавливаем курсор после +7(
+    companyPhoneEdit->setCursorPosition(3); //устанавливаем курсор после +7(
     
-    // Обработчик клика для установки курсора после +7(
+    //обработчик клика для установки курсора после +7(
     connect(companyPhoneEdit, &QLineEdit::selectionChanged, [this]() {
         if (companyPhoneEdit->cursorPosition() < 3) {
             companyPhoneEdit->setCursorPosition(3);
@@ -79,7 +79,7 @@ void RegisterDialog::setupUi() {
     companyLayout->addRow("Контактное лицо*:", contactPersonEdit);
     profileStack->addWidget(companyWidget);
 
-    // Форма соискателя
+    //форма соискателя
     auto *applicantWidget = new QWidget;
     auto *applicantLayout = new QFormLayout(applicantWidget);
     fullNameEdit = new QLineEdit;
@@ -89,9 +89,9 @@ void RegisterDialog::setupUi() {
     birthDateEdit->setDate(QDate::currentDate().addYears(-18));
     applicantPhoneEdit = new QLineEdit;
     applicantPhoneEdit->setInputMask("+7(999)999-99-99;_");
-    applicantPhoneEdit->setCursorPosition(3); // Устанавливаем курсор после +7(
+    applicantPhoneEdit->setCursorPosition(3); //устанавливаем курсор после +7(
     
-    // Обработчик клика для установки курсора после +7(
+    //обработчик клика для установки курсора после +7(
     connect(applicantPhoneEdit, &QLineEdit::selectionChanged, [this]() {
         if (applicantPhoneEdit->cursorPosition() < 3) {
             applicantPhoneEdit->setCursorPosition(3);
@@ -100,7 +100,7 @@ void RegisterDialog::setupUi() {
     emailEdit = new QLineEdit;
     specialtyEdit = new QLineEdit;
     
-    // Опыт работы с ползунком
+    //опыт работы с ползунком
     auto *expLayout = new QHBoxLayout;
     experienceEdit = new QLineEdit;
     experienceEdit->setText("0");
@@ -113,7 +113,7 @@ void RegisterDialog::setupUi() {
     expLayout->addWidget(experienceEdit);
     expLayout->addWidget(experienceSlider);
     
-    // Зарплата с ползунком
+    //зарплата с ползунком
     auto *salaryLayout = new QHBoxLayout;
     salaryEdit = new QLineEdit;
     salaryEdit->setText("30000");
@@ -147,7 +147,7 @@ void RegisterDialog::setupUi() {
     connect(btnRegister, &QPushButton::clicked, this, &RegisterDialog::onRegister);
     connect(btnCancel, &QPushButton::clicked, this, &QDialog::reject);
     
-    // Синхронизация ползунков
+    //синхронизация ползунков
     connect(experienceSlider, &QSlider::valueChanged, [this](int value) {
         experienceEdit->setText(QString::number(value));
     });
@@ -177,7 +177,7 @@ void RegisterDialog::onTypeChanged(int index) {
 }
 
 void RegisterDialog::onRegister() {
-    // Базовая валидация
+    //базовая валидация
     if (loginEdit->text().trimmed().isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Введите логин!");
         return;
@@ -188,7 +188,7 @@ void RegisterDialog::onRegister() {
         return;
     }
 
-    // Валидация в зависимости от типа
+    //валидация в зависимости от типа
     if (typeCombo->currentIndex() == 0) { // Компания
         if (!validateCompanyData()) return;
     } else { // Соискатель
@@ -213,7 +213,7 @@ bool RegisterDialog::validateCompanyData() {
         return false;
     }
     
-    // Проверка что ИНН содержит только цифры
+    //проверка что ИНН содержит только цифры
     for (QChar c : inn) {
         if (!c.isDigit()) {
             QMessageBox::warning(this, "Ошибка", "ИНН должен содержать только цифры!");
@@ -240,7 +240,7 @@ bool RegisterDialog::validateApplicantData() {
         return false;
     }
     
-    // Проверка возраста
+    //проверка возраста
     QDate currentDate = QDate::currentDate();
     int age = birthDateEdit->date().daysTo(currentDate) / 365;
     if (age < 16) {
@@ -259,7 +259,7 @@ bool RegisterDialog::validateApplicantData() {
         return false;
     }
     
-    // Простая проверка email
+    //простая проверка email
     if (!email.contains("@") || !email.contains(".")) {
         QMessageBox::warning(this, "Ошибка", "Введите корректный email!");
         return false;
@@ -270,7 +270,7 @@ bool RegisterDialog::validateApplicantData() {
         return false;
     }
     
-    // Проверка зарплаты
+    //проверка зарплаты
     bool ok;
     double salary = salaryEdit->text().toDouble(&ok);
     if (!ok || salary < 0) {
@@ -292,7 +292,7 @@ bool RegisterDialog::registerUser() {
     
     userType = (typeCombo->currentIndex() == 0) ? "company" : "applicant";
 
-    // Создаем пользователя
+    //создаем пользователя
     QSqlQuery query(db);
     QString sql = QueryLoader::instance().getQuery("InsertUser");
     query.prepare(sql);
@@ -308,7 +308,7 @@ bool RegisterDialog::registerUser() {
     
     userId = query.value(0).toInt();
 
-    // Создаем профиль
+    //создаем профиль
     if (userType == "company") {
         sql = QueryLoader::instance().getQuery("InsertCompany");
         query.prepare(sql);
@@ -339,7 +339,7 @@ bool RegisterDialog::registerUser() {
 
     profileId = query.value(0).toInt();
 
-    // Обновляем profile_id в users
+    //обновляем profile_id в users
     sql = QueryLoader::instance().getQuery("UpdateUserProfile");
     query.prepare(sql);
     query.addBindValue(profileId);
